@@ -1,3 +1,4 @@
+import { MotionConfig } from 'framer-motion';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router';
@@ -10,11 +11,14 @@ import { router } from './router';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <I18nProvider>
-      <AuthProvider>
-        <RouterProvider router={router} />
-        <Toaster position="top-center" richColors closeButton />
-      </AuthProvider>
-    </I18nProvider>
+    {/* reducedMotion="user" honours prefers-reduced-motion for every framer-motion animation */}
+    <MotionConfig reducedMotion="user">
+      <I18nProvider>
+        <AuthProvider>
+          <RouterProvider router={router} />
+          <Toaster position="top-center" richColors closeButton toastOptions={{ style: { borderRadius: 14, fontFamily: 'Inter, sans-serif' } }} />
+        </AuthProvider>
+      </I18nProvider>
+    </MotionConfig>
   </StrictMode>,
 );

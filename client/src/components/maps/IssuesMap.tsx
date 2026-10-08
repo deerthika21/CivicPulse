@@ -44,7 +44,7 @@ export function IssuesMap({
   className?: string;
 }) {
   return (
-    <div className={cn('relative overflow-hidden rounded-xl border', className)}>
+    <div className={cn('relative isolate overflow-hidden rounded-2xl border border-border bg-card shadow-soft', className)}>
       <MapContainer center={CHENNAI_CENTER} zoom={12} className="h-full w-full">
         <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} />
         {[...points]
@@ -77,10 +77,10 @@ export function IssuesMap({
           })}
         <FitBounds points={points} selectedId={selectedId} />
       </MapContainer>
-      <div className="pointer-events-none absolute bottom-2 left-2 z-[500] flex gap-2 rounded-md bg-white/90 px-2 py-1 text-[11px] shadow">
+      <div className="pointer-events-none absolute bottom-3 left-3 z-[500] flex items-center gap-2.5 rounded-xl border border-border bg-white/95 px-3 py-1.5 text-[11px] font-semibold text-slate-600 shadow-lift backdrop-blur">
         {[5, 4, 3, 2, 1].map((p) => (
           <span key={p} className="flex items-center gap-1">
-            <span className="size-2.5 rounded-full border border-white" style={{ background: PRIORITY_META[p].color }} />P{p}
+            <span className="size-2.5 rounded-full ring-2 ring-white" style={{ background: PRIORITY_META[p].color }} />P{p}
           </span>
         ))}
       </div>

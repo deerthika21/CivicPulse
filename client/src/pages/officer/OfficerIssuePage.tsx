@@ -1,35 +1,41 @@
-import { ArrowLeft, CheckCircle2, GitMerge, Loader2, MapPin, PenLine, Phone, Play, Sparkles, User, XCircle } from 'lucide-react';
+import { ArrowLeft, CalendarClock, CheckCircle2, GitMerge, Images, Loader2, MapPin, MessageSquareText, PenLine, Phone, Play, RotateCcw, Sparkles, User, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { toast } from 'sonner';
-import { AiFallbackBadge, CategoryLabel, PriorityBadge, ReportCountBadge, SlaBadge, StatusBadge } from '@/components/badges';
+import { AiFallbackBadge, CategoryIcon, PriorityBadge, ReportCountBadge, SlaBadge, StatusBadge } from '@/components/badges';
 import { IssuesMap } from '@/components/maps/IssuesMap';
+import { PageTransition, Stagger, StaggerItem } from '@/components/motion';
 import { ErrorState } from '@/components/states';
 import { Timeline } from '@/components/Timeline';
 import { Button } from '@/components/ui/button';
-import { Card, CardTitle } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Badge, Label, Select, Skeleton, Textarea } from '@/components/ui/primitives';
 import { useAsync } from '@/hooks/useAsync';
 import { ApiError, getIssue, getMeta, mediaUrl, updateIssue } from '@/lib/api';
 import { formatDateTime, hours, timeAgo } from '@/lib/format';
 import type { Complaint, IssueDetail, IssueStatus } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 export function OfficerIssuePage() {
   const { id = '' } = useParams();
   const detail = useAsync(() => getIssue(id), [id]);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-4">
+    <PageTransition className="space-y-5">
       <Button asChild variant="ghost" size="sm" className="-ml-2">
         <Link to="/officer">
           <ArrowLeft /> Back to queue
         </Link>
       </Button>
       {detail.loading && !detail.data ? (
-        <div className="grid gap-4 lg:grid-cols-3">
-          <Skeleton className="h-64 lg:col-span-2" />
-          <Skeleton className="h-64" />
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="space-y-4">
+            <Skeleton className="h-40" />
+            <Skeleton className="h-56" />
+            <Skeleton className="h-40" />
+          </div>
+          <Skeleton className="h-96" />
         </div>
       ) : detail.error ? (
         <ErrorState
@@ -39,7 +45,7 @@ export function OfficerIssuePage() {
       ) : detail.data ? (
         <IssueView data={detail.data} onChange={detail.setData} />
       ) : null}
-    </div>
+    </PageTransition>
   );
 }
 
@@ -49,6 +55,7 @@ function IssueView({ data, onChange }: { data: IssueDetail; onChange: (d: IssueD
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState<string | null>(null);
   const active = issue.status === 'open' || issue.status === 'in_progress';
+  const photos = complaints.filter((c) => c.photoUrl);
 
   const act = async (body: Record<string, unknown>, label: string) => {
     setSaving(label);
@@ -65,103 +72,145 @@ function IssueView({ data, onChange }: { data: IssueDetail; onChange: (d: IssueD
   };
 
   const setStatus = (status: IssueStatus, label: string) => act({ status, ...(note.trim() ? { note: note.trim() } : {}) }, label);
-  const first = complaints[0];
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div className="min-w-0 space-y-4">
-        {/* Header */}
-        <Card className="gap-3">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <PriorityBadge priority={issue.priority} />
+    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
+      {/* ---------------- left ---------------- */}
+      <div className="min-w-0 space-y-5">
+        <Card className="gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <PriorityBadge priority={issue.priority} size="lg" />
             <StatusBadge status={issue.status} />
             <SlaBadge state={issue.slaState} dueAt={issue.slaDueAt} />
             <ReportCountBadge count={issue.reportCount} />
             {issue.aiFallback && <AiFallbackBadge />}
           </div>
-          <h1 className="text-xl font-bold leading-snug">{issue.summary}</h1>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-            <CategoryLabel category={issue.category} />
-            <span>→ {issue.department}</span>
+          <h1 className="font-display text-2xl font-bold leading-snug tracking-tight text-slate-900">{issue.summary}</h1>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-2">
+              <CategoryIcon category={issue.category} className="size-7 rounded-lg" /> {issue.category} <span className="text-subtle">→</span>{' '}
+              <span className="font-semibold text-foreground">{issue.department}</span>
+            </span>
             {issue.locationHint && (
-              <span className="flex items-center gap-1">
-                <MapPin className="size-3.5" /> {issue.locationHint}
+              <span className="inline-flex items-center gap-1.5">
+                <MapPin className="size-4 text-brand-600" /> {issue.locationHint}
               </span>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">
-            First reported {formatDateTime(issue.createdAt)} · SLA {hours(issue.slaHours)} · due {formatDateTime(issue.slaDueAt)}
-          </p>
-          {issue.resolutionNote && <p className="rounded-md bg-emerald-50 p-2.5 text-sm text-emerald-900">Resolution: {issue.resolutionNote}</p>}
+          <div className="grid gap-3 rounded-xl bg-slate-50 p-3 text-xs ring-1 ring-inset ring-border sm:grid-cols-3">
+            <Meta label="First reported" value={formatDateTime(issue.createdAt)} />
+            <Meta label="SLA window" value={hours(issue.slaHours)} />
+            <Meta label="Due" value={formatDateTime(issue.slaDueAt)} danger={issue.slaState === 'breached'} />
+          </div>
+          {issue.resolutionNote && (
+            <p className="flex gap-2 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-900 ring-1 ring-inset ring-emerald-200">
+              <CheckCircle2 className="mt-0.5 size-4 shrink-0" /> {issue.resolutionNote}
+            </p>
+          )}
         </Card>
 
-        {/* AI reasoning */}
-        <Card className="gap-3">
-          <div className="flex items-center justify-between gap-2">
+        {photos.length > 0 && (
+          <Card className="gap-3">
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="size-4 text-primary" /> AI triage
+              <Images className="size-4 text-brand-600" /> Photos <span className="font-normal text-subtle">({photos.length})</span>
             </CardTitle>
-            <Button variant="outline" size="sm" onClick={() => setOverrideOpen(true)}>
-              <PenLine /> Override
-            </Button>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {photos.map((c, i) => (
+                <a
+                  key={c.id}
+                  href={mediaUrl(c.photoUrl)!}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={cn('group relative overflow-hidden rounded-xl border border-border', i === 0 && photos.length > 2 && 'col-span-2 row-span-2')}
+                >
+                  <img src={mediaUrl(c.photoUrl)!} alt={`Photo from ${c.trackingCode}`} className="aspect-[4/3] h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" loading="lazy" />
+                  <span className="absolute bottom-1.5 left-1.5 rounded-md bg-slate-900/70 px-1.5 py-0.5 font-mono text-[10px] text-white">{c.trackingCode}</span>
+                </a>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* AI reasoning */}
+        <div className="gradient-border relative overflow-hidden rounded-2xl p-6 shadow-soft">
+          <div className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-brand-500/10 blur-3xl" />
+          <CardHeader>
+            <div>
+              <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-600">
+                <Sparkles className="size-3.5" /> AI reasoning
+              </p>
+              <p className="mt-2 text-[15px] font-medium leading-relaxed text-foreground">
+                <span className="font-display font-bold">Why P{issue.priority}: </span>
+                {issue.priorityReason}
+              </p>
+            </div>
+          </CardHeader>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <Field label="Category" value={issue.category} locked={issue.lockedFields.includes('category')} />
             <Field label="Department" value={issue.department} locked={issue.lockedFields.includes('department')} />
             <Field label="Priority" value={`P${issue.priority}`} locked={issue.lockedFields.includes('priority')} />
           </div>
-          <p className="rounded-md bg-muted/60 p-3 text-sm">
-            <span className="font-medium">Why P{issue.priority}: </span>
-            {issue.priorityReason}
-          </p>
-          <ConfidenceBar value={issue.confidence} />
+          <div className="mt-4">
+            <ConfidenceBar value={issue.confidence} />
+          </div>
           {issue.overrides.length > 0 && (
-            <div className="space-y-1 border-t pt-3">
-              <p className="text-xs font-medium text-muted-foreground">Override audit log</p>
+            <div className="mt-5 space-y-2 border-t border-border pt-4">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-subtle">Override audit log</p>
               {issue.overrides.map((o, i) => (
-                <p key={i} className="text-xs">
-                  <strong>{o.field}</strong>: {String(o.from)} → {String(o.to)} — “{o.reason}” · {o.byName}, {timeAgo(o.at)}
+                <p key={i} className="flex gap-2 text-xs text-slate-700">
+                  <PenLine className="mt-0.5 size-3.5 shrink-0 text-violet-600" />
+                  <span>
+                    <strong className="capitalize">{o.field}</strong> {String(o.from)} → {String(o.to)} — “{o.reason}” <span className="text-subtle">· {o.byName}, {timeAgo(o.at)}</span>
+                  </span>
                 </p>
               ))}
             </div>
           )}
-        </Card>
+        </div>
 
-        {/* Reports */}
-        <section className="space-y-2">
-          <h2 className="flex items-center gap-2 px-1 text-sm font-semibold">
-            <GitMerge className="size-4" /> {complaints.length} citizen report{complaints.length === 1 ? '' : 's'}
+        {/* reports as chat */}
+        <section className="space-y-3">
+          <h2 className="flex items-center gap-2 font-display text-base font-bold">
+            <MessageSquareText className="size-4 text-brand-600" /> {complaints.length} citizen report{complaints.length === 1 ? '' : 's'}
+            {complaints.length > 1 && <span className="text-sm font-normal text-subtle">merged into this issue</span>}
           </h2>
-          {complaints.map((c) => (
-            <ComplaintCard key={c.id} c={c} />
-          ))}
+          <Stagger className="space-y-3" step={0.04}>
+            {complaints.map((c, i) => (
+              <StaggerItem key={c.id}>
+                <ComplaintBubble c={c} index={i} />
+              </StaggerItem>
+            ))}
+          </Stagger>
         </section>
       </div>
 
-      {/* Sidebar */}
-      <aside className="space-y-4">
-        <Card className="gap-3">
-          <CardTitle>Update status</CardTitle>
-          <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note for the citizen / audit log (optional)" className="min-h-20" maxLength={1000} />
+      {/* ---------------- right: sticky action panel ---------------- */}
+      <aside className="space-y-5 lg:sticky lg:top-24">
+        <Card className="gap-4">
+          <CardHeader>
+            <CardTitle>Take action</CardTitle>
+            <StatusBadge status={issue.status} />
+          </CardHeader>
+          <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note for the citizen and audit log (optional)" className="min-h-24" maxLength={1000} />
           <div className="grid gap-2">
             {issue.status === 'open' && (
-              <Button onClick={() => setStatus('in_progress', 'Marked in progress')} disabled={!!saving}>
+              <Button size="lg" onClick={() => setStatus('in_progress', 'Marked in progress')} disabled={!!saving}>
                 {saving === 'Marked in progress' ? <Loader2 className="animate-spin" /> : <Play />} Start work
               </Button>
             )}
             {active && (
-              <Button variant={issue.status === 'open' ? 'outline' : 'default'} onClick={() => setStatus('resolved', 'Marked resolved')} disabled={!!saving}>
+              <Button size="lg" variant={issue.status === 'open' ? 'outline' : 'teal'} onClick={() => setStatus('resolved', 'Marked resolved')} disabled={!!saving}>
                 {saving === 'Marked resolved' ? <Loader2 className="animate-spin" /> : <CheckCircle2 />} Mark resolved
               </Button>
             )}
             {active && (
-              <Button variant="ghost" className="text-muted-foreground" onClick={() => setStatus('rejected', 'Closed')} disabled={!!saving}>
-                <XCircle /> Close (not actionable)
+              <Button variant="ghost" onClick={() => setStatus('rejected', 'Closed')} disabled={!!saving}>
+                <XCircle /> Close as not actionable
               </Button>
             )}
             {!active && (
-              <Button variant="outline" onClick={() => setStatus('open', 'Reopened')} disabled={!!saving}>
-                Reopen
+              <Button variant="outline" size="lg" onClick={() => setStatus('open', 'Reopened')} disabled={!!saving}>
+                <RotateCcw /> Reopen
               </Button>
             )}
             {note.trim() && (
@@ -170,18 +219,29 @@ function IssueView({ data, onChange }: { data: IssueDetail; onChange: (d: IssueD
               </Button>
             )}
           </div>
+          <div className="rounded-xl border border-dashed border-violet-300 bg-violet-50/50 p-3">
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-violet-900">
+              <Sparkles className="size-4" /> Disagree with the AI?
+            </p>
+            <p className="mt-0.5 text-xs text-violet-800/80">Change category, department or priority. Your reason is logged.</p>
+            <Button variant="outline" size="sm" className="mt-2.5 w-full" onClick={() => setOverrideOpen(true)}>
+              <PenLine /> Override AI decision
+            </Button>
+          </div>
         </Card>
 
-        {first && (
-          <IssuesMap
-            points={[{ id: issue.id, lat: issue.location.lat, lng: issue.location.lng, priority: issue.priority, reportCount: issue.reportCount, summary: issue.summary }]}
-            className="h-56"
-          />
-        )}
+        <IssuesMap
+          points={[{ id: issue.id, lat: issue.location.lat, lng: issue.location.lng, priority: issue.priority, reportCount: issue.reportCount, summary: issue.summary }]}
+          className="h-56"
+        />
 
-        <Card className="gap-3">
-          <CardTitle>Timeline</CardTitle>
-          <Timeline entries={issue.timeline} />
+        <Card className="gap-4">
+          <CardTitle className="flex items-center gap-2">
+            <CalendarClock className="size-4 text-brand-600" /> Timeline
+          </CardTitle>
+          <div className="scrollbar-thin max-h-[420px] overflow-auto pr-1">
+            <Timeline entries={issue.timeline} />
+          </div>
         </Card>
       </aside>
 
@@ -190,13 +250,22 @@ function IssueView({ data, onChange }: { data: IssueDetail; onChange: (d: IssueD
   );
 }
 
+function Meta({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
+  return (
+    <div>
+      <p className="text-subtle">{label}</p>
+      <p className={cn('mt-0.5 font-semibold', danger ? 'text-red-600' : 'text-foreground')}>{value}</p>
+    </div>
+  );
+}
+
 function Field({ label, value, locked }: { label: string; value: string; locked: boolean }) {
   return (
-    <div className="rounded-lg border p-2.5">
-      <p className="flex items-center justify-between text-[11px] text-muted-foreground">
-        {label} {locked && <Badge className="border-violet-200 bg-violet-50 px-1.5 text-[10px] text-violet-800">officer set</Badge>}
+    <div className="rounded-xl bg-white/80 p-3 ring-1 ring-inset ring-border">
+      <p className="flex items-center justify-between gap-2 text-[11px] font-medium text-subtle">
+        {label} {locked && <Badge className="bg-violet-50 px-1.5 py-0 text-[10px] text-violet-700 ring-violet-500/20">officer set</Badge>}
       </p>
-      <p className="mt-0.5 text-sm font-medium">{value}</p>
+      <p className="mt-1 text-sm font-semibold">{value}</p>
     </div>
   );
 }
@@ -205,67 +274,62 @@ function ConfidenceBar({ value }: { value: number }) {
   const pct = Math.round(value * 100);
   return (
     <div className="flex items-center gap-3 text-xs">
-      <span className="w-24 text-muted-foreground">AI confidence</span>
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted" role="meter" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-        <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+      <span className="w-24 font-medium text-subtle">AI confidence</span>
+      <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100" role="meter" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="AI confidence">
+        <div className="h-full rounded-full bg-gradient-to-r from-brand-600 to-teal-500" style={{ width: `${pct}%` }} />
       </div>
-      <span className="w-9 text-right font-medium tabular-nums">{pct}%</span>
+      <span className="w-10 text-right font-bold tabular-nums">{pct}%</span>
     </div>
   );
 }
 
-function ComplaintCard({ c }: { c: Complaint }) {
+const AVATAR_TONES = ['from-brand-500 to-brand-800', 'from-teal-400 to-teal-700', 'from-amber-400 to-orange-500', 'from-pink-400 to-rose-600', 'from-sky-400 to-sky-600'];
+
+function ComplaintBubble({ c, index }: { c: Complaint; index: number }) {
+  const name = c.citizen?.name || 'Citizen';
   return (
-    <Card className="gap-2 p-4">
-      <div className="flex flex-wrap items-center gap-1.5 text-xs">
-        <span className="font-mono font-semibold">{c.trackingCode}</span>
-        <Badge className="bg-muted">{c.language}</Badge>
-        <Badge className="bg-muted capitalize">{c.sentiment}</Badge>
-        {c.mergedAsDuplicate && c.duplicateSimilarity != null && (
-          <Badge className="border-indigo-200 bg-indigo-50 text-indigo-800" title={`Matched via ${c.duplicateMethod?.replace('_', ' ')}`}>
-            <GitMerge className="size-3" /> {Math.round(c.duplicateSimilarity * 100)}% similar · {c.duplicateDistanceM} m
-          </Badge>
-        )}
-        <span className="ml-auto text-muted-foreground">{formatDateTime(c.createdAt)}</span>
-      </div>
-      {c.text && <p className="whitespace-pre-wrap text-sm">{c.text}</p>}
-      {c.transcript && (
-        <p className="rounded-md bg-muted/60 p-2 text-sm">
-          <span className="text-xs text-muted-foreground">Voice transcript: </span>
-          {c.transcript}
-        </p>
-      )}
-      {c.language !== 'English' && c.translation && (
-        <p className="rounded-md bg-accent/50 p-2 text-sm">
-          <span className="text-xs text-muted-foreground">Translation: </span>
-          {c.translation}
-        </p>
-      )}
-      {(c.photoUrl || c.audioUrl) && (
-        <div className="flex flex-wrap items-start gap-2">
-          {c.photoUrl && (
-            <a href={mediaUrl(c.photoUrl)!} target="_blank" rel="noreferrer">
-              <img src={mediaUrl(c.photoUrl)!} alt="Complaint photo" className="h-32 rounded-lg border object-cover" loading="lazy" />
-            </a>
+    <div className="flex gap-3">
+      <span className={cn('mt-1 flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white shadow-sm', AVATAR_TONES[index % AVATAR_TONES.length])}>
+        {name === 'Citizen' ? <User className="size-4" /> : name[0].toUpperCase()}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+          <span className="font-semibold text-foreground">{name}</span>
+          <span className="font-mono text-subtle">{c.trackingCode}</span>
+          <span className="text-subtle">· {formatDateTime(c.createdAt)}</span>
+          {c.mergedAsDuplicate && c.duplicateSimilarity != null && (
+            <Badge className="bg-brand-50 font-semibold text-brand-800 ring-brand-500/20" title={`Matched via ${c.duplicateMethod?.replace('_', ' ')}`}>
+              <GitMerge className="size-3" /> {Math.round(c.duplicateSimilarity * 100)}% similar · {c.duplicateDistanceM} m
+            </Badge>
           )}
-          {c.audioUrl && <audio src={mediaUrl(c.audioUrl)!} controls className="h-10" />}
         </div>
-      )}
-      {(c.citizen?.name || c.citizen?.phone) && (
-        <p className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-          {c.citizen.name && (
-            <span className="flex items-center gap-1">
-              <User className="size-3" /> {c.citizen.name}
-            </span>
+        <div className="rounded-2xl rounded-tl-md border border-border bg-card p-4 shadow-soft">
+          <div className="mb-2 flex flex-wrap gap-1.5">
+            <Badge className="bg-slate-900 text-white ring-slate-900">{c.language}</Badge>
+            <Badge className="capitalize">{c.sentiment}</Badge>
+          </div>
+          {c.text && <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-slate-800">{c.text}</p>}
+          {c.transcript && (
+            <p className="mt-2 rounded-xl bg-slate-50 p-2.5 text-sm text-slate-700 ring-1 ring-inset ring-border">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-subtle">Voice transcript · </span>
+              {c.transcript}
+            </p>
           )}
-          {c.citizen.phone && (
-            <a href={`tel:${c.citizen.phone}`} className="flex items-center gap-1 hover:underline">
+          {c.language !== 'English' && c.translation && (
+            <div className="mt-3 border-l-2 border-teal-500 pl-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-teal-700">English translation</p>
+              <p className="mt-0.5 text-sm text-slate-700">{c.translation}</p>
+            </div>
+          )}
+          {c.audioUrl && <audio src={mediaUrl(c.audioUrl)!} controls className="mt-3 h-10 w-full" />}
+          {c.citizen?.phone && (
+            <a href={`tel:${c.citizen.phone}`} className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:underline">
               <Phone className="size-3" /> {c.citizen.phone}
             </a>
           )}
-        </p>
-      )}
-    </Card>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -319,25 +383,32 @@ function OverrideDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogTitle>Override AI decision</DialogTitle>
-        <DialogDescription>Changes are locked against future AI updates and recorded in the audit log.</DialogDescription>
-        <div className="grid gap-3">
+      <DialogContent className="rounded-2xl">
+        <div className="flex items-center gap-3">
+          <span className="flex size-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+            <PenLine className="size-5" />
+          </span>
+          <div>
+            <DialogTitle className="font-display">Override AI decision</DialogTitle>
+            <DialogDescription>Locked against future AI updates and recorded in the audit log.</DialogDescription>
+          </div>
+        </div>
+        <div className="grid gap-4">
           <div className="space-y-1.5">
             <Label>Category</Label>
-            <Select value={category} onChange={(e) => onCategory(e.target.value)} className="w-full">
+            <Select value={category} onChange={(e) => onCategory(e.target.value)} className="h-11 w-full">
               {(meta.data?.categories ?? [issue.category]).map((c) => <option key={c}>{c}</option>)}
             </Select>
           </div>
           <div className="space-y-1.5">
             <Label>Department</Label>
-            <Select value={department} onChange={(e) => setDepartment(e.target.value)} className="w-full">
+            <Select value={department} onChange={(e) => setDepartment(e.target.value)} className="h-11 w-full">
               {(meta.data?.departments ?? [issue.department]).map((d) => <option key={d}>{d}</option>)}
             </Select>
           </div>
           <div className="space-y-1.5">
             <Label>Priority</Label>
-            <Select value={priority} onChange={(e) => setPriority(Number(e.target.value))} className="w-full">
+            <Select value={priority} onChange={(e) => setPriority(Number(e.target.value))} className="h-11 w-full">
               {[5, 4, 3, 2, 1].map((p) => (
                 <option key={p} value={p}>
                   P{p} — {meta.data?.priorityRubric[p] ?? ''}
@@ -347,9 +418,9 @@ function OverrideDialog({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="reason">Reason</Label>
-            <Textarea id="reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Site inspection shows exposed cable — danger to life" className="min-h-20" />
+            <Textarea id="reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Site inspection shows exposed cable — danger to life" className="min-h-24" />
           </div>
-          {error && <p className="text-sm text-red-700">{error}</p>}
+          {error && <p className="rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700">{error}</p>}
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={() => onOpenChange(false)}>

@@ -1,8 +1,9 @@
-import { Camera, Trash2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { Camera, ImagePlus, RefreshCw, Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState, type DragEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { compressImage } from '@/lib/image';
 import { useI18n } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 
 const MAX_BYTES = 8 * 1024 * 1024;
 
@@ -11,6 +12,7 @@ export function PhotoPicker({ value, onChange }: { value: File | null; onChange:
   const input = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
     if (!value) return setPreview(null);
@@ -28,6 +30,12 @@ export function PhotoPicker({ value, onChange }: { value: File | null; onChange:
     onChange(compressed);
   };
 
+  const onDrop = (e: DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    void pick(e.dataTransfer.files?.[0]);
+  };
+
   return (
     <div>
       <input
@@ -42,23 +50,43 @@ export function PhotoPicker({ value, onChange }: { value: File | null; onChange:
         }}
       />
       {preview ? (
-        <div className="relative overflow-hidden rounded-lg border">
-          <img src={preview} alt="Selected" className="max-h-56 w-full object-cover" />
-          <div className="absolute right-2 top-2 flex gap-1">
-            <Button type="button" size="sm" variant="secondary" onClick={() => input.current?.click()}>
-              {t('changePhoto')}
+        <div className="group relative overflow-hidden rounded-2xl border border-border shadow-soft">
+          <img src={preview} alt="Selected" className="h-52 w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent" />
+          <div className="absolute bottom-3 right-3 flex gap-2">
+            <Button type="button" size="sm" variant="glass" onClick={() => input.current?.click()}>
+              <RefreshCw /> {t('changePhoto')}
             </Button>
-            <Button type="button" size="icon" variant="secondary" onClick={() => onChange(null)} aria-label={t('remove')}>
+            <Button type="button" size="icon-sm" variant="glass" onClick={() => onChange(null)} aria-label={t('remove')}>
               <Trash2 />
             </Button>
           </div>
         </div>
       ) : (
-        <Button type="button" variant="outline" className="w-full" onClick={() => input.current?.click()}>
-          <Camera /> {t('addPhoto')}
-        </Button>
+        <button
+          type="button"
+          onClick={() => input.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={onDrop}
+          className={cn(
+            'flex w-full items-center gap-4 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/60 p-4 text-left transition-all duration-150 hover:border-brand-500/60 hover:bg-brand-50/50 active:scale-[0.99]',
+            dragging && 'border-brand-500 bg-brand-50',
+          )}
+        >
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 shadow-soft ring-1 ring-border">
+            {dragging ? <ImagePlus className="size-5" /> : <Camera className="size-5" />}
+          </span>
+          <span>
+            <span className="block text-sm font-semibold text-foreground">{t('dropPhoto')}</span>
+            <span className="block text-xs text-subtle">{t('dropPhotoHint')}</span>
+          </span>
+        </button>
       )}
-      {error && <p className="mt-1 text-xs text-red-700">{error}</p>}
+      {error && <p className="mt-1.5 text-xs font-medium text-red-700">{error}</p>}
     </div>
   );
 }

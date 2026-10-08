@@ -1,57 +1,69 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-@custom-variant dark (&:is(.dark *));
+/* ============================================================
+   CivicPulse design system — tokens defined once, used everywhere
+   ============================================================ */
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.985 0.002 247);
-  --foreground: oklch(0.21 0.03 265);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.03 265);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.03 265);
-  /* teal brand */
-  --primary: oklch(0.51 0.09 186);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.96 0.01 247);
-  --secondary-foreground: oklch(0.21 0.03 265);
-  --muted: oklch(0.96 0.01 247);
-  --muted-foreground: oklch(0.55 0.03 257);
-  --accent: oklch(0.95 0.03 186);
-  --accent-foreground: oklch(0.3 0.06 186);
-  --destructive: oklch(0.58 0.22 27);
-  --border: oklch(0.92 0.01 255);
-  --input: oklch(0.92 0.01 255);
-  --ring: oklch(0.51 0.09 186);
-}
+  --radius: 1rem;
 
-.dark {
-  --background: oklch(0.16 0.02 265);
-  --foreground: oklch(0.97 0 0);
-  --card: oklch(0.21 0.03 265);
-  --card-foreground: oklch(0.97 0 0);
-  --popover: oklch(0.21 0.03 265);
-  --popover-foreground: oklch(0.97 0 0);
-  --primary: oklch(0.7 0.12 182);
-  --primary-foreground: oklch(0.16 0.02 265);
-  --secondary: oklch(0.28 0.03 265);
-  --secondary-foreground: oklch(0.97 0 0);
-  --muted: oklch(0.28 0.03 265);
-  --muted-foreground: oklch(0.71 0.02 257);
-  --accent: oklch(0.3 0.05 186);
-  --accent-foreground: oklch(0.97 0 0);
-  --destructive: oklch(0.7 0.19 22);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.7 0.12 182);
+  /* surfaces & ink (slate) */
+  --background: #f8fafc;
+  --foreground: #0f172a; /* slate-900 */
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --muted: #f1f5f9; /* slate-100 */
+  --muted-foreground: #475569; /* slate-600 */
+  --subtle-foreground: #64748b; /* slate-500 */
+  --border: #e2e8f0; /* slate-200 */
+  --input: #e2e8f0;
+
+  /* brand */
+  --brand-900: #312e81;
+  --brand-800: #3730a3;
+  --brand-600: #4f46e5;
+  --brand-500: #6366f1;
+  --brand-100: #e0e7ff;
+  --brand-50: #eef2ff;
+  --teal-600: #0d9488;
+  --teal-500: #14b8a6;
+  --teal-50: #f0fdfa;
+
+  --primary: var(--brand-600);
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --accent: var(--brand-50);
+  --accent-foreground: var(--brand-800);
+  --destructive: #dc2626;
+  --ring: var(--brand-600);
+
+  /* priority (soft tinted pills) */
+  --p5: #dc2626;
+  --p4: #f97316;
+  --p3: #f59e0b;
+  --p2: #0ea5e9;
+  --p1: #94a3b8;
+
+  /* elevation */
+  --shadow-soft: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.04);
+  --shadow-lift: 0 4px 8px -2px rgb(15 23 42 / 0.06), 0 12px 24px -8px rgb(15 23 42 / 0.1);
+  --shadow-brand: 0 8px 24px -8px rgb(79 70 229 / 0.45);
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: 'Inter', 'Noto Sans Tamil', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Noto Sans Tamil', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 6px);
+  --radius-lg: calc(var(--radius) - 4px);
+  --radius-xl: calc(var(--radius) - 2px);
+  --radius-2xl: var(--radius);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -64,20 +76,149 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-subtle: var(--subtle-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-sans: 'Inter', 'Noto Sans Tamil', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-900: var(--brand-900);
+  --color-brand-800: var(--brand-800);
+  --color-brand-600: var(--brand-600);
+  --color-brand-500: var(--brand-500);
+  --color-brand-100: var(--brand-100);
+  --color-brand-50: var(--brand-50);
+  --color-teal-brand: var(--teal-600);
+
+  --color-p5: var(--p5);
+  --color-p4: var(--p4);
+  --color-p3: var(--p3);
+  --color-p2: var(--p2);
+  --color-p1: var(--p1);
+
+  --shadow-soft: var(--shadow-soft);
+  --shadow-lift: var(--shadow-lift);
+  --shadow-brand: var(--shadow-brand);
+
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-gradient: gradient-pan 3s ease infinite;
+  --animate-float: float 8s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+@keyframes gradient-pan {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -14px, 0); }
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/40;
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background font-sans text-foreground antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+  :lang(ta) h1, :lang(ta) h2, :lang(ta) h3 {
+    letter-spacing: 0;
+    line-height: 1.35;
+  }
+}
+
+@layer utilities {
+  .bg-brand-gradient {
+    background-image: linear-gradient(135deg, var(--brand-800) 0%, var(--brand-600) 100%);
+  }
+  .bg-brand-teal-gradient {
+    background-image: linear-gradient(135deg, var(--brand-800) 0%, var(--brand-600) 45%, var(--teal-600) 100%);
+  }
+  .text-brand-gradient {
+    background-image: linear-gradient(100deg, var(--brand-800), var(--brand-600) 45%, var(--teal-600));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* hero mesh: soft indigo → teal blobs */
+  .bg-mesh {
+    background-color: var(--background);
+    background-image:
+      radial-gradient(at 12% 8%, rgb(99 102 241 / 0.28) 0px, transparent 50%),
+      radial-gradient(at 88% 0%, rgb(13 148 136 / 0.22) 0px, transparent 45%),
+      radial-gradient(at 70% 60%, rgb(79 70 229 / 0.12) 0px, transparent 50%),
+      radial-gradient(at 0% 90%, rgb(20 184 166 / 0.14) 0px, transparent 45%);
+  }
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgb(15 23 42 / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(15 23 42 / 0.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 75%);
+  }
+  .bg-grid-light {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.08) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .shimmer {
+    background-image: linear-gradient(90deg, #eef2f7 0%, #f8fafc 40%, #eef2f7 80%);
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+  /* gradient border via padding-box/border-box trick */
+  .gradient-border {
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(var(--card), var(--card)) padding-box,
+      linear-gradient(135deg, var(--brand-600), var(--teal-600)) border-box;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+}
+
+/* Leaflet polish */
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: #eef2f7;
+}
+.leaflet-control-zoom {
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft) !important;
+}
+.leaflet-control-zoom a {
+  color: var(--foreground) !important;
+}
+.leaflet-tooltip {
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lift);
+  padding: 6px 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }
