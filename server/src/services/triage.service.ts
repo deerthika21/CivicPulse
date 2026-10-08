@@ -182,9 +182,14 @@ export async function triageComplaint(input: TriageInput): Promise<TriageResult>
     } catch (err) {
       lastError = err instanceof z.ZodError ? 'invalid AI output' : (err as Error).message;
       console.warn(`[triage] attempt ${attempt} failed: ${lastError}`);
-      // If the model rejected an attachment (e.g. unsupported audio codec), retry with text/photo only.
-      if (current.audio && /mime|audio|unsupported|invalid argument|400/i.test(lastError) && (current.text || current.photo)) {
-        current = { ...current, audio: undefined };
+      // If the model rejected an attachment (corrupt photo, unsupported audio codec), retry without it.
+      if (/mime|unsupported|invalid argument|unable to process|400/i.test(lastError)) {
+        const blamesImage = /image|photo/i.test(lastError);
+        if (current.photo && (blamesImage || !current.audio) && (current.text || current.audio)) {
+          current = { ...current, photo: undefined };
+        } else if (current.audio && (current.text || current.photo)) {
+          current = { ...current, audio: undefined };
+        }
       }
     }
   }
