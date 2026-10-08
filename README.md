@@ -99,10 +99,6 @@ Every AI decision shows its reasoning, officers can override it, complaints are 
 
 WhatsApp complaint bot · predictive hotspots · integration with existing grievance portals · more languages
 
-## 👥 Team [TEAM NAME]
-
-[Name] · [Name] · [Name]
-
 ---
 
 <div align="center">
