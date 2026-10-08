@@ -8,7 +8,7 @@ export function NotFoundPage() {
     <div className="relative flex min-h-dvh flex-col items-center justify-center gap-6 overflow-hidden bg-mesh p-6 text-center">
       <div className="pointer-events-none absolute inset-0 bg-grid" />
       <Logo className="relative" />
-      <div className="relative flex size-16 items-center justify-center rounded-2xl bg-white shadow-lift ring-1 ring-border">
+      <div className="relative flex size-16 items-center justify-center rounded-2xl bg-card shadow-lift ring-1 ring-border">
         <Compass className="size-7 text-brand-600" />
       </div>
       <div className="relative space-y-2">

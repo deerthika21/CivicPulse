@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Check, Copy, FileText, ImageIcon, MapPin, Mic, Search, ShieldAlert, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Copy, FileText, ImageIcon, MapPin, Mic, Search, Send, ShieldAlert } from 'lucide-react';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
@@ -13,6 +13,7 @@ import { Input, Label, Textarea } from '@/components/ui/primitives';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { submitComplaint } from '@/lib/api';
 import { CHENNAI_CENTER } from '@/lib/constants';
+import { AiCore } from '@/components/AiCore';
 import { useI18n, type StringKey } from '@/lib/i18n';
 import { addMyReport } from '@/lib/myReports';
 import type { LatLng, SubmitResponse } from '@/lib/types';
@@ -93,7 +94,8 @@ export function ReportPage() {
     <PageTransition className="mx-auto max-w-xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
       <form onSubmit={onSubmit} className="space-y-6">
         <div>
-          <h1 className="font-display text-[28px] font-bold tracking-tight">{t('newComplaint')}</h1>
+          <h1 className="font-display text-4xl font-extrabold tracking-tight">{t('newComplaint')}</h1>
+          <p className="mt-1 text-muted-foreground">{t('newComplaintSub')}</p>
           <Stepper step={step} onStep={(s) => s < step && goto(s)} />
         </div>
 
@@ -104,7 +106,7 @@ export function ReportPage() {
                 <div className="space-y-2.5">
                   <Label htmlFor="text">{t('describe')}</Label>
                   <Textarea id="text" value={text} onChange={(e) => setText(e.target.value)} placeholder={t('describePlaceholder')} maxLength={4000} autoFocus />
-                  <p className="text-right text-[11px] text-subtle tabular-nums">{text.length} / 4000</p>
+                  <p className="text-right text-[0.6875rem] text-subtle tabular-nums">{text.length} / 4000</p>
                 </div>
                 <PhotoPicker value={photo} onChange={setPhoto} />
                 <VoiceRecorder value={audio} onChange={setAudio} />
@@ -179,7 +181,7 @@ export function ReportPage() {
               </>
             ) : (
               <>
-                <Sparkles /> {t('submit')}
+                <Send /> {t('submit')}
               </>
             )}
           </Button>
@@ -217,7 +219,7 @@ function Stepper({ step, onStep }: { step: number; onStep: (s: number) => void }
               >
                 {done ? <Check className="size-4" /> : <Icon className="size-3.5" />}
               </span>
-              <span className={cn('truncate text-[13px] font-semibold', current ? 'text-foreground' : 'text-subtle')}>{t(key)}</span>
+              <span className={cn('truncate text-[0.8125rem] font-semibold', current ? 'text-foreground' : 'text-subtle')}>{t(key)}</span>
             </button>
             {i < STEPS.length - 1 && <span className={cn('h-0.5 min-w-3 flex-1 rounded-full transition-colors', done ? 'bg-teal-500' : 'bg-slate-200')} />}
           </li>
@@ -259,21 +261,13 @@ function AnalysingOverlay({ hasPhoto }: { hasPhoto: boolean }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[900] flex flex-col items-center justify-center gap-6 bg-white/85 p-6 text-center backdrop-blur-md"
+      className="theme-light fixed inset-0 z-[900] flex flex-col items-center justify-center gap-8 bg-navy-950/95 p-6 text-center text-white backdrop-blur-md"
       role="status"
       aria-live="polite"
     >
       <div className="relative">
-        <div className="absolute -inset-6 animate-pulse rounded-full bg-brand-teal-gradient opacity-30 blur-2xl" />
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 3, ease: 'linear' }}
-          className="relative flex size-24 items-center justify-center rounded-[28px] bg-[linear-gradient(120deg,#3730A3,#4F46E5,#0D9488,#4F46E5,#3730A3)] bg-[length:300%_300%] animate-gradient shadow-brand"
-        >
-          <motion.div animate={{ rotate: -360 }} transition={{ repeat: Infinity, duration: 3, ease: 'linear' }}>
-            <Sparkles className="size-10 text-white" strokeWidth={1.75} />
-          </motion.div>
-        </motion.div>
+        <div className="absolute inset-[-60%] rounded-full bg-[radial-gradient(circle,rgb(99_102_241/0.35),transparent_65%)]" />
+        <AiCore size={168} label={t('analysing')} />
       </div>
       <div className="h-14 space-y-2">
         <AnimatePresence mode="wait">
@@ -283,19 +277,52 @@ function AnalysingOverlay({ hasPhoto }: { hasPhoto: boolean }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.25 }}
-            className="font-display text-xl font-bold text-slate-900"
+            className="font-display text-2xl font-bold text-white"
           >
             {lines[i]}
           </motion.p>
         </AnimatePresence>
-        <p className="text-sm text-muted-foreground">{t('analysingSub')}</p>
+        <p className="text-sm text-slate-400">{t('analysingSub')}</p>
       </div>
       <div className="flex gap-1.5">
         {lines.map((_, k) => (
-          <span key={k} className={cn('h-1.5 rounded-full transition-all duration-300', k === i ? 'w-6 bg-brand-600' : 'w-1.5 bg-slate-300')} />
+          <span key={k} className={cn('h-1.5 rounded-full transition-all duration-300', k === i ? 'w-6 bg-gold' : 'w-1.5 bg-white/25')} />
         ))}
       </div>
     </motion.div>
+  );
+}
+
+/** Pins fly in from around the banner and collapse into one, then the count pops. */
+function PinsCollapse({ count }: { count: number }) {
+  const spots = [
+    [-34, -18], [30, -22], [-28, 20], [34, 16], [0, -30], [-8, 28],
+  ].slice(0, Math.max(2, Math.min(6, count)));
+  return (
+    <div className="relative size-16 shrink-0" aria-hidden>
+      {spots.map(([x, y], k) => (
+        <motion.span
+          key={k}
+          className="absolute left-1/2 top-1/2 -ml-2.5 -mt-5"
+          initial={{ x, y, opacity: 0, scale: 0.7 }}
+          animate={{ x: 0, y: 0, opacity: [0, 1, 1, 0], scale: [0.7, 1, 1, 0.6] }}
+          transition={{ duration: 1.1, delay: 0.35 + k * 0.06, times: [0, 0.25, 0.8, 1], ease: [0.22, 1, 0.36, 1] }}
+        >
+          <MapPin className="size-5 fill-amber-300 text-brand-800" strokeWidth={1.5} />
+        </motion.span>
+      ))}
+      <motion.span className="absolute left-1/2 top-1/2 -ml-4 -mt-8" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.35, type: 'spring', stiffness: 300, damping: 14 }}>
+        <MapPin className="size-8 fill-white text-brand-800 drop-shadow" strokeWidth={1.5} />
+      </motion.span>
+      <motion.span
+        className="absolute -right-1 top-0 rounded-full bg-gold px-1.5 py-0.5 text-[0.6875rem] font-bold text-navy-950"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 1.5, type: 'spring', stiffness: 320, damping: 12 }}
+      >
+        +{count}
+      </motion.span>
+    </div>
   );
 }
 
@@ -335,9 +362,9 @@ function SubmitResult({ result, onAnother }: { result: SubmitResponse; onAnother
       </div>
 
       {/* tracking ID */}
-      <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-900 p-4 pl-5 text-white shadow-lift">
+      <div className="theme-light flex items-center justify-between gap-3 rounded-2xl bg-slate-900 p-4 pl-5 text-white shadow-lift ring-1 ring-white/5">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{t('trackingId')}</p>
+          <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-slate-400">{t('trackingId')}</p>
           <p className="font-mono text-2xl font-bold tracking-[0.12em]">{complaint.trackingCode}</p>
           <p className="mt-0.5 text-xs text-slate-400">{t('saveCode')}</p>
         </div>
@@ -355,17 +382,13 @@ function SubmitResult({ result, onAnother }: { result: SubmitResponse; onAnother
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2, duration: 0.3 }}
-              className="relative overflow-hidden rounded-2xl bg-brand-gradient p-5 text-white shadow-brand"
+              className="theme-light relative overflow-hidden rounded-2xl bg-brand-gradient p-5 text-white shadow-brand"
             >
               <div className="pointer-events-none absolute inset-0 bg-grid-light" />
               <div className="relative flex items-center gap-4">
-                <div className="flex -space-x-2.5">
-                  {['from-amber-300 to-orange-400', 'from-teal-300 to-teal-500', 'from-pink-300 to-rose-400'].slice(0, Math.min(3, others)).map((g, k) => (
-                    <span key={k} className={`size-9 rounded-full bg-gradient-to-br ring-2 ring-brand-600 ${g}`} />
-                  ))}
-                  <span className="flex size-9 items-center justify-center rounded-full bg-white text-xs font-bold text-brand-800 ring-2 ring-brand-600">+{others}</span>
-                </div>
+                <PinsCollapse count={others} />
                 <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-indigo-200">{t('mergedTitle')}</p>
                   <p className="font-display text-lg font-bold leading-tight">
                     +{others} {t('citizensReported')}
                   </p>

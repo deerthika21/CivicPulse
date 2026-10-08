@@ -77,10 +77,10 @@ export function IssuesMap({
           })}
         <FitBounds points={points} selectedId={selectedId} />
       </MapContainer>
-      <div className="pointer-events-none absolute bottom-3 left-3 z-[500] flex items-center gap-2.5 rounded-xl border border-border bg-white/95 px-3 py-1.5 text-[11px] font-semibold text-slate-600 shadow-lift backdrop-blur">
+      <div className="pointer-events-none absolute bottom-3 left-3 z-[500] flex items-center gap-2.5 rounded-xl border border-border bg-card/95 px-3 py-1.5 text-[0.6875rem] font-semibold text-slate-600 shadow-lift backdrop-blur">
         {[5, 4, 3, 2, 1].map((p) => (
           <span key={p} className="flex items-center gap-1">
-            <span className="size-2.5 rounded-full ring-2 ring-white" style={{ background: PRIORITY_META[p].color }} />P{p}
+            <span className="size-2.5 rounded-full ring-2 ring-card" style={{ background: PRIORITY_META[p].color }} />P{p}
           </span>
         ))}
       </div>

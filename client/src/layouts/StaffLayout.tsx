@@ -2,14 +2,17 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { BarChart3, Building2, ChevronDown, ExternalLink, Inbox, LogOut, PanelLeftClose, PanelLeftOpen, Search } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, Navigate, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router';
-import { Logo, LogoMark } from '@/components/Logo';
+import { Emblem, Wordmark } from '@/components/gov/Emblem';
+import { UtilityBar } from '@/components/gov/UtilityBar';
+import { AiCore } from '@/components/AiCore';
+import { useI18n, type StringKey } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import type { AuthUser, Role } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
-const NAV: { to: string; label: string; icon: typeof Inbox; roles: Role[] }[] = [
-  { to: '/officer', label: 'Issue queue', icon: Inbox, roles: ['officer', 'admin'] },
-  { to: '/admin/analytics', label: 'Analytics', icon: BarChart3, roles: ['admin'] },
+const NAV: { to: string; label: StringKey; icon: typeof Inbox; roles: Role[] }[] = [
+  { to: '/officer', label: 'navQueue', icon: Inbox, roles: ['officer', 'admin'] },
+  { to: '/admin/analytics', label: 'navAnalytics', icon: BarChart3, roles: ['admin'] },
 ];
 
 const COLLAPSE_KEY = 'cp_sidebar_collapsed';
@@ -36,6 +39,7 @@ function useNarrow(query = '(max-width: 1023px)') {
 /** Desktop-first shell for officer and admin pages; also the auth guard. */
 export function StaffLayout({ roles = ['officer', 'admin'] }: { roles?: Role[] }) {
   const { user, logout } = useAuth();
+  const { t } = useI18n();
   const location = useLocation();
   const [userCollapsed, setCollapsed] = useState(readCollapsed);
   const narrow = useNarrow();
@@ -58,28 +62,29 @@ export function StaffLayout({ roles = ['officer', 'admin'] }: { roles?: Role[] }
 
   return (
     <div className="flex min-h-dvh bg-background">
+      <div className="contents">
       {/* ---------- sidebar ---------- */}
       <aside
         className={cn(
-          'sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-border bg-white transition-[width] duration-200 md:flex',
+          'sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-border bg-card transition-[width] duration-200 md:flex',
           collapsed ? 'w-[72px]' : 'w-[248px]',
         )}
       >
-        <div className={cn('flex h-16 items-center border-b border-border', collapsed ? 'justify-center' : 'px-5')}>
-          <Link to="/officer">{collapsed ? <LogoMark /> : <Logo />}</Link>
+        <div className={cn('flex h-[6.25rem] items-center border-b border-border', collapsed ? 'justify-center' : 'px-5')}>
+          <Link to="/officer" className="rounded-lg">{collapsed ? <Emblem /> : <Wordmark />}</Link>
         </div>
         <nav className="flex flex-1 flex-col gap-1 p-3">
-          {!collapsed && <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wider text-subtle">Workspace</p>}
+          {!collapsed && <p className="px-3 pb-1 pt-2 text-[0.6875rem] font-semibold uppercase tracking-wider text-subtle">{t('workspace')}</p>}
           {nav.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
-              title={collapsed ? label : undefined}
+              title={collapsed ? t(label) : undefined}
               className={({ isActive }) =>
                 cn(
                   'group relative flex h-10 items-center gap-3 rounded-xl text-sm font-medium transition-colors',
                   collapsed ? 'justify-center' : 'px-3',
-                  isActive ? 'bg-brand-50 text-brand-800' : 'text-muted-foreground hover:bg-slate-100 hover:text-foreground',
+                  isActive ? 'bg-brand-50 text-brand-800' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                 )
               }
             >
@@ -87,7 +92,7 @@ export function StaffLayout({ roles = ['officer', 'admin'] }: { roles?: Role[] }
                 <>
                   {isActive && <motion.span layoutId="nav-active" className="absolute inset-y-2 left-0 w-1 rounded-r-full bg-brand-600" />}
                   <Icon className={cn('size-[18px]', isActive && 'text-brand-600')} strokeWidth={2} />
-                  {!collapsed && label}
+                  {!collapsed && t(label)}
                 </>
               )}
             </NavLink>
@@ -96,39 +101,42 @@ export function StaffLayout({ roles = ['officer', 'admin'] }: { roles?: Role[] }
             href="/"
             target="_blank"
             rel="noreferrer"
-            title={collapsed ? 'Citizen app' : undefined}
-            className={cn('flex h-10 items-center gap-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-slate-100 hover:text-foreground', collapsed ? 'justify-center' : 'px-3')}
+            title={collapsed ? t('navCitizen') : undefined}
+            className={cn('flex h-10 items-center gap-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground', collapsed ? 'justify-center' : 'px-3')}
           >
-            <ExternalLink className="size-[18px]" /> {!collapsed && 'Citizen app'}
+            <ExternalLink className="size-[18px]" /> {!collapsed && t('navCitizen')}
           </a>
         </nav>
         <div className={cn('border-t border-border p-3', narrow && 'hidden')}>
           <button
             type="button"
             onClick={toggle}
-            className={cn('flex h-10 w-full items-center gap-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-slate-100 hover:text-foreground', collapsed ? 'justify-center' : 'px-3')}
+            className={cn('flex h-10 w-full items-center gap-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground', collapsed ? 'justify-center' : 'px-3')}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {collapsed ? <PanelLeftOpen className="size-[18px]" /> : <PanelLeftClose className="size-[18px]" />}
-            {!collapsed && 'Collapse'}
+            {!collapsed && t('collapse')}
           </button>
         </div>
       </aside>
 
       {/* ---------- main ---------- */}
       <div className="flex min-w-0 flex-1 flex-col">
+        <UtilityBar />
         <TopBar user={user} onLogout={logout} nav={nav} />
-        <main className="min-w-0 flex-1">
+        <main id="main" tabIndex={-1} className="min-w-0 flex-1 outline-none">
           <div className="mx-auto w-full max-w-[1280px] px-4 py-6 md:px-6 lg:px-8 lg:py-8 2xl:max-w-[1600px]">
             <Outlet />
           </div>
         </main>
+      </div>
       </div>
     </div>
   );
 }
 
 function TopBar({ user, onLogout, nav }: { user: AuthUser; onLogout: () => void; nav: typeof NAV }) {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const location = useLocation();
@@ -142,33 +150,34 @@ function TopBar({ user, onLogout, nav }: { user: AuthUser; onLogout: () => void;
   };
 
   return (
-    <header className="sticky top-0 z-[700] flex h-16 items-center gap-3 border-b border-border bg-white/80 px-4 backdrop-blur-xl md:px-6 lg:px-8">
-      <Link to="/officer" className="md:hidden">
-        <LogoMark />
+    <header className="sticky top-0 z-[700] flex h-16 items-center gap-3 border-b border-border bg-card/80 px-4 backdrop-blur-xl md:px-6 lg:px-8">
+      <Link to="/officer" className="rounded-lg md:hidden">
+        <Emblem className="size-8" />
       </Link>
       <form onSubmit={onSearch} className="relative max-w-md flex-1">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search issues, areas…"
-          aria-label="Search issues"
-          className="h-10 w-full rounded-xl border border-border bg-slate-50 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-500/10"
+          placeholder={t('searchIssues')}
+          aria-label={t('searchIssues')}
+          className="h-10 w-full rounded-xl border border-border bg-slate-50 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-brand-500 focus:bg-card focus:ring-4 focus:ring-brand-500/10"
         />
       </form>
       <div className="ml-auto flex items-center gap-2">
         {/* compact nav on small screens */}
         <nav className="flex items-center gap-1 md:hidden">
           {nav.map(({ to, label, icon: Icon }) => (
-            <NavLink key={to} to={to} aria-label={label} className={({ isActive }) => cn('rounded-lg p-2', isActive ? 'bg-brand-50 text-brand-700' : 'text-muted-foreground')}>
+            <NavLink key={to} to={to} aria-label={t(label)} className={({ isActive }) => cn('rounded-lg p-2', isActive ? 'bg-brand-50 text-brand-700' : 'text-muted-foreground')}>
               <Icon className="size-4" />
             </NavLink>
           ))}
         </nav>
         <span className="hidden items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-800 ring-1 ring-inset ring-brand-500/20 lg:inline-flex">
           <Building2 className="size-3.5" />
-          {user.role === 'admin' ? 'All departments' : user.department}
+          {user.role === 'admin' ? t('allDepartments') : user.department}
         </span>
+        <AiCore size={22} className="hidden sm:inline-flex" label="AI triage online" />
         <UserMenu user={user} onLogout={onLogout} />
       </div>
     </header>
@@ -176,6 +185,7 @@ function TopBar({ user, onLogout, nav }: { user: AuthUser; onLogout: () => void;
 }
 
 function UserMenu({ user, onLogout }: { user: AuthUser; onLogout: () => void }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -207,12 +217,12 @@ function UserMenu({ user, onLogout }: { user: AuthUser; onLogout: () => void }) 
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="flex items-center gap-2 rounded-xl p-1 pr-2 transition hover:bg-slate-100"
+        className="flex items-center gap-2 rounded-xl p-1 pr-2 transition hover:bg-muted"
       >
         <span className="flex size-8 items-center justify-center rounded-lg bg-brand-gradient text-xs font-bold text-white">{initials || 'U'}</span>
         <span className="hidden text-left leading-tight sm:block">
           <span className="block text-sm font-semibold">{user.name}</span>
-          <span className="block text-[11px] capitalize text-subtle">{user.role}</span>
+          <span className="block text-[0.6875rem] capitalize text-subtle">{user.role}</span>
         </span>
         <ChevronDown className={cn('size-4 text-subtle transition-transform', open && 'rotate-180')} />
       </button>
@@ -224,12 +234,12 @@ function UserMenu({ user, onLogout }: { user: AuthUser; onLogout: () => void }) 
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.98 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-border bg-white shadow-lift"
+            className="absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-border bg-card shadow-lift"
           >
             <div className="border-b border-border p-4">
               <p className="text-sm font-semibold">{user.name}</p>
               <p className="truncate text-xs text-subtle">{user.email}</p>
-              <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+              <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5 text-[0.6875rem] font-medium text-slate-600">
                 <Building2 className="size-3" /> {user.role === 'admin' ? 'Administrator · all departments' : `${user.department} department`}
               </p>
             </div>
@@ -240,7 +250,7 @@ function UserMenu({ user, onLogout }: { user: AuthUser; onLogout: () => void }) 
                 onClick={onLogout}
                 className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
               >
-                <LogOut className="size-4" /> Sign out
+                <LogOut className="size-4" /> {t('signOut')}
               </button>
             </div>
           </motion.div>

@@ -11,7 +11,8 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': { target: 'http://localhost:5000', changeOrigin: true },
+      // CP_API_TARGET lets a second dev stack (e.g. dev:demo on :5100) run beside the main one.
+      '/api': { target: process.env.CP_API_TARGET ?? 'http://localhost:5000', changeOrigin: true },
     },
   },
 });

@@ -39,15 +39,15 @@ export function StatCard({ icon: Icon, label, value, decimals, suffix, hint, ton
       type={onClick ? 'button' : undefined}
       onClick={onClick}
       className={cn(
-        'group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 text-left shadow-soft transition-all duration-200',
+        'glass group relative flex h-full w-full flex-col gap-3 overflow-hidden rounded-2xl border border-border p-4 text-left shadow-soft transition-all duration-200 before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/60 before:to-transparent before:opacity-60 dark:before:from-white/5',
         onClick && 'cursor-pointer hover:-translate-y-0.5 hover:shadow-lift',
         active && 'border-brand-500 ring-4 ring-brand-500/10',
         alert && 'border-red-200',
       )}
     >
       {alert && <span className="absolute inset-x-0 top-0 h-0.5 bg-red-500" />}
-      <div className="flex items-center justify-between">
-        <span className="text-[13px] font-medium text-muted-foreground">{label}</span>
+      <div className="relative flex min-h-9 items-start justify-between gap-2">
+        <span className="pt-1 text-[0.8125rem] font-medium leading-tight text-muted-foreground">{label}</span>
         <span className={cn('flex size-8 items-center justify-center rounded-xl ring-1', TONES[tone])}>
           <Icon className="size-4" />
         </span>
@@ -55,11 +55,11 @@ export function StatCard({ icon: Icon, label, value, decimals, suffix, hint, ton
       {loading ? (
         <Skeleton className="h-8 w-16" />
       ) : (
-        <span className="font-display text-[28px] font-bold leading-none tracking-tight">
+        <span className="relative font-display text-[1.75rem] font-bold leading-none tracking-tight">
           {value == null ? '–' : <CountUp value={value} decimals={decimals} suffix={suffix} />}
         </span>
       )}
-      {hint && <span className="text-xs text-subtle">{hint}</span>}
+      {hint && <span className="relative mt-auto text-xs leading-snug text-subtle">{hint}</span>}
     </Comp>
   );
 }

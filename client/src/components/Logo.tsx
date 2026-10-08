@@ -19,7 +19,7 @@ export function Logo({ className, light }: { className?: string; light?: boolean
   return (
     <span className={cn('inline-flex items-center gap-2.5', className)}>
       <LogoMark />
-      <span className={cn('font-display text-[17px] font-bold tracking-tight', light ? 'text-white' : 'text-foreground')}>
+      <span className={cn('font-display text-[1.0625rem] font-bold tracking-tight', light ? 'text-white' : 'text-foreground')}>
         Civic<span className={light ? 'text-teal-300' : 'text-brand-600'}>Pulse</span>
       </span>
     </span>

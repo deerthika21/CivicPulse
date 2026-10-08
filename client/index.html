@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#3730A3" />
+    <meta name="theme-color" content="#071433" />
     <meta name="description" content="CivicPulse — report civic issues in Chennai. AI routes them to the right department in seconds." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,7 +12,17 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <title>CivicPulse — AI complaint triage for Chennai</title>
+    <script>
+      // apply theme before first paint (no flash)
+      try {
+        var t = localStorage.getItem('cp_theme');
+        if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
+        var f = localStorage.getItem('cp_fs');
+        if (f === 'sm' || f === 'lg') document.documentElement.dataset.fs = f;
+        if (localStorage.getItem('cp_lang') === 'ta') document.documentElement.lang = 'ta';
+      } catch (e) {}
+    </script>
+    <title>CivicPulse — Every complaint. The right desk.</title>
   </head>
   <body>
     <div id="root"></div>

@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import './palette-dark.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================================
    CivicPulse design system — tokens defined once, used everywhere
@@ -32,6 +35,15 @@
   --teal-500: #14b8a6;
   --teal-50: #f0fdfa;
 
+  /* government identity */
+  --navy-950: #071433;
+  --navy-900: #0b1f4b;
+  --navy-800: #13306b;
+  --gold: #c9a227;
+  --gold-soft: #e6c868;
+  --saffron: #ff9933;
+  --india-green: #138808;
+
   --primary: var(--brand-600);
   --primary-foreground: #ffffff;
   --secondary: #f1f5f9;
@@ -52,6 +64,61 @@
   --shadow-soft: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.04);
   --shadow-lift: 0 4px 8px -2px rgb(15 23 42 / 0.06), 0 12px 24px -8px rgb(15 23 42 / 0.1);
   --shadow-brand: 0 8px 24px -8px rgb(79 70 229 / 0.45);
+
+  --shimmer-a: #eef2f7;
+  --shimmer-b: #f8fafc;
+  --grid-line: rgb(15 23 42 / 0.05);
+  color-scheme: light;
+}
+
+/* ---------- dark theme: same roles, re-stepped for a dark surface ---------- */
+.dark {
+  color-scheme: dark;
+  --background: #0b1120;
+  --foreground: #e6eaf2;
+  --card: #111a2e;
+  --card-foreground: #e6eaf2;
+  --popover: #131d33;
+  --popover-foreground: #e6eaf2;
+  --muted: #1a2540;
+  --muted-foreground: #a3aec4;
+  --subtle-foreground: #7f8ba3;
+  --border: #23304d;
+  --input: #2a3858;
+
+  --brand-900: #e0e7ff;
+  --brand-800: #c7d2fe;
+  --brand-600: #8b8ef7;
+  --brand-500: #7c7ff5;
+  --brand-100: rgb(124 127 245 / 0.24);
+  --brand-50: rgb(124 127 245 / 0.13);
+  --teal-600: #14b8a6;
+  --teal-50: rgb(20 184 166 / 0.12);
+
+  --primary: #6366f1;
+  --secondary: #1a2540;
+  --secondary-foreground: #e6eaf2;
+  --accent: rgb(124 127 245 / 0.13);
+  --accent-foreground: #c7d2fe;
+  --ring: #7c7ff5;
+
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.35), 0 0 0 1px rgb(255 255 255 / 0.02);
+  --shadow-lift: 0 8px 16px -4px rgb(0 0 0 / 0.45), 0 18px 36px -12px rgb(0 0 0 / 0.55);
+  --shadow-brand: 0 8px 24px -8px rgb(99 102 241 / 0.55);
+
+  --shimmer-a: #18223a;
+  --shimmer-b: #22304d;
+  --grid-line: rgb(255 255 255 / 0.045);
+}
+
+/* brand islands keep their light-mode brand tokens in dark mode */
+.dark .theme-light {
+  --brand-900: #312e81;
+  --brand-800: #3730a3;
+  --brand-600: #4f46e5;
+  --brand-500: #6366f1;
+  --brand-100: #e0e7ff;
+  --brand-50: #eef2ff;
 }
 
 @theme inline {
@@ -91,6 +158,11 @@
   --color-brand-100: var(--brand-100);
   --color-brand-50: var(--brand-50);
   --color-teal-brand: var(--teal-600);
+  --color-navy-950: var(--navy-950);
+  --color-navy-900: var(--navy-900);
+  --color-navy-800: var(--navy-800);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
 
   --color-p5: var(--p5);
   --color-p4: var(--p4);
@@ -115,12 +187,32 @@
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
+@keyframes core-breathe {
+  0%, 100% { transform: scale(0.92); opacity: 0.75; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+@keyframes core-orbit {
+  from { transform: rotateX(68deg) rotateZ(0deg); }
+  to { transform: rotateX(68deg) rotateZ(360deg); }
+}
+@keyframes core-orbit-b {
+  from { transform: rotateY(70deg) rotateZ(0deg); }
+  to { transform: rotateY(70deg) rotateZ(-360deg); }
+}
 @keyframes float {
   0%, 100% { transform: translate3d(0, 0, 0); }
   50% { transform: translate3d(0, -14px, 0); }
 }
 
+/* A− / A / A+ text-size controls scale every rem-based size */
+html[data-fs='sm'] { font-size: 93.75%; }
+html[data-fs='lg'] { font-size: 112.5%; }
+
 @layer base {
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
   * {
     @apply border-border outline-ring/40;
   }
@@ -142,17 +234,47 @@
 }
 
 @layer utilities {
-  .bg-brand-gradient {
-    background-image: linear-gradient(135deg, var(--brand-800) 0%, var(--brand-600) 100%);
+  /* saffron · white · green hairline under the header */
+  .tricolour {
+    height: 3px;
+    background: linear-gradient(90deg, var(--saffron) 0 33.33%, #ffffff 33.33% 66.66%, var(--india-green) 66.66% 100%);
   }
-  .bg-brand-teal-gradient {
-    background-image: linear-gradient(135deg, var(--brand-800) 0%, var(--brand-600) 45%, var(--teal-600) 100%);
+  .dark .tricolour {
+    background: linear-gradient(90deg, var(--saffron) 0 33.33%, #e5e7eb 33.33% 66.66%, var(--india-green) 66.66% 100%);
   }
-  .text-brand-gradient {
-    background-image: linear-gradient(100deg, var(--brand-800), var(--brand-600) 45%, var(--teal-600));
+  .bg-navy-hero {
+    background-color: var(--navy-950);
+    background-image:
+      radial-gradient(80% 60% at 50% 0%, rgb(55 48 163 / 0.55) 0%, transparent 70%),
+      radial-gradient(50% 40% at 85% 70%, rgb(13 148 136 / 0.22) 0%, transparent 70%),
+      linear-gradient(180deg, var(--navy-950) 0%, var(--navy-900) 100%);
+  }
+  .text-gold-gradient {
+    background-image: linear-gradient(100deg, #f3dd8b, var(--gold) 55%, #b88a12);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+  .glass {
+    background: color-mix(in oklab, var(--card) 72%, transparent);
+    backdrop-filter: blur(14px) saturate(1.2);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  }
+
+  .bg-brand-gradient {
+    background-image: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%);
+  }
+  .bg-brand-teal-gradient {
+    background-image: linear-gradient(135deg, #3730a3 0%, #4f46e5 45%, #0d9488 100%);
+  }
+  .text-brand-gradient {
+    background-image: linear-gradient(100deg, #3730a3, #4f46e5 45%, #0d9488);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .dark .text-brand-gradient {
+    background-image: linear-gradient(100deg, #a5b4fc, #8b8ef7 45%, #2dd4bf);
   }
   /* hero mesh: soft indigo → teal blobs */
   .bg-mesh {
@@ -165,8 +287,8 @@
   }
   .bg-grid {
     background-image:
-      linear-gradient(to right, rgb(15 23 42 / 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgb(15 23 42 / 0.05) 1px, transparent 1px);
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
     background-size: 32px 32px;
     mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 75%);
   }
@@ -177,7 +299,7 @@
     background-size: 32px 32px;
   }
   .shimmer {
-    background-image: linear-gradient(90deg, #eef2f7 0%, #f8fafc 40%, #eef2f7 80%);
+    background-image: linear-gradient(90deg, var(--shimmer-a) 0%, var(--shimmer-b) 40%, var(--shimmer-a) 80%);
     background-size: 200% 100%;
     animation: var(--animate-shimmer);
   }
@@ -196,7 +318,7 @@
 /* Leaflet polish */
 .leaflet-container {
   font-family: var(--font-sans);
-  background: #eef2f7;
+  background: var(--muted);
 }
 .leaflet-control-zoom {
   border: 1px solid var(--border) !important;
@@ -212,6 +334,28 @@
   border: 1px solid var(--border);
   box-shadow: var(--shadow-lift);
   padding: 6px 10px;
+}
+
+.leaflet-control-zoom a,
+.leaflet-control-attribution {
+  background: var(--card) !important;
+}
+.leaflet-control-attribution a {
+  color: var(--muted-foreground) !important;
+}
+.leaflet-tooltip {
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+.leaflet-tooltip-top::before {
+  border-top-color: var(--popover);
+}
+/* dark basemap: invert OSM tiles only (markers live in another pane) */
+.dark .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.6);
+}
+.dark .leaflet-container {
+  background: #0e1628;
 }
 
 @media (prefers-reduced-motion: reduce) {

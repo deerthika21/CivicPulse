@@ -14,22 +14,26 @@ import { getMeta, getQueueSummary, listIssues } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { PRIORITY_META } from '@/lib/constants';
 import { timeAgo } from '@/lib/format';
+import { useI18n, type StringKey } from '@/lib/i18n';
 import type { Issue } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 const REFRESH_MS = 60_000;
 
-const STATUS_CHIPS = [
-  { value: 'active', label: 'Active' },
-  { value: 'open', label: 'Open' },
-  { value: 'in_progress', label: 'In progress' },
-  { value: 'resolved', label: 'Resolved' },
-  { value: 'rejected', label: 'Closed' },
-  { value: 'all', label: 'All' },
+const STATUS_CHIPS: { value: string; label: StringKey }[] = [
+  { value: 'active', label: 'filterActive' },
+  { value: 'open', label: 'filterOpen' },
+  { value: 'in_progress', label: 'filterInProgress' },
+  { value: 'resolved', label: 'filterResolved' },
+  { value: 'rejected', label: 'filterClosed' },
+  { value: 'all', label: 'filterAll' },
 ];
+
+const todayLabel = (lang: string) => new Date().toLocaleDateString(lang === 'ta' ? 'ta-IN' : 'en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
 
 export function OfficerQueuePage() {
   const { user } = useAuth();
+  const { t, lang } = useI18n();
   const isAdmin = user?.role === 'admin';
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -78,126 +82,117 @@ export function OfficerQueuePage() {
   return (
     <PageTransition className="space-y-6">
       <PageHeader
-        eyebrow={isAdmin ? 'Administrator' : 'Department queue'}
-        title={isAdmin ? filters.department || 'All departments' : `${user?.department}`}
-        description="Sorted by AI priority and SLA deadline · refreshes every minute"
+        eyebrow={`${todayLabel(lang)} · ${isAdmin ? t('allDepartments') : t('queueEyebrow')}`}
+        title={isAdmin ? filters.department || t('allDepartments') : `${user?.department}`}
+        description={t('queueSub')}
         actions={
           <Button
             variant="outline"
+            className="h-9"
             size="sm"
             onClick={() => {
               issues.reload(true);
               summary.reload(true);
             }}
           >
-            <RefreshCw /> Refresh
+            <RefreshCw /> {t('refresh')}
           </Button>
         }
       />
 
-      {/* SLA alert */}
       {s && s.breached > 0 && filters.sla !== 'breached' && (
         <button
           type="button"
           onClick={() => setFilter('sla', 'breached')}
-          className="group flex w-full items-center gap-3 rounded-2xl border border-red-200 bg-gradient-to-r from-red-50 to-white px-4 py-3 text-left text-sm transition hover:shadow-soft"
+          className="group flex w-full items-center gap-3 rounded-2xl border border-red-200 bg-gradient-to-r from-red-50 to-card px-4 py-3 text-left text-sm transition hover:shadow-soft"
         >
           <span className="relative flex size-8 shrink-0 items-center justify-center rounded-xl bg-red-600 text-white">
             <span className="absolute inset-0 animate-ping rounded-xl bg-red-500/40" />
             <AlertTriangle className="relative size-4" />
           </span>
           <span className="text-red-900">
-            <strong>
-              {s.breached} issue{s.breached > 1 ? 's have' : ' has'} breached SLA.
-            </strong>{' '}
-            <span className="text-red-800/80">Review them first →</span>
+            <strong className="tabular-nums">{s.breached}</strong> <strong>{t('pastDeadlineBanner')}</strong> <span aria-hidden>→</span>
           </span>
         </button>
       )}
 
-      {/* KPIs */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
-        <StatCard icon={Inbox} label="Open" value={s?.open} loading={summary.loading} tone="brand" hint="Awaiting action" onClick={() => setFilter('status', 'open')} active={filters.status === 'open'} />
-        <StatCard icon={Wrench} label="In progress" value={s?.inProgress} loading={summary.loading} tone="violet" hint="Crews assigned" onClick={() => setFilter('status', 'in_progress')} active={filters.status === 'in_progress'} />
-        <StatCard icon={Flame} label="Critical P5" value={s?.critical} loading={summary.loading} tone="red" hint="Danger to life" onClick={() => setFilter('priority', '5')} active={filters.priority === '5'} alert={!!s?.critical} />
-        <StatCard icon={Clock} label="SLA at risk" value={s?.atRisk} loading={summary.loading} tone="amber" hint="> 75% of SLA used" onClick={() => setFilter('sla', 'at_risk')} active={filters.sla === 'at_risk'} />
-        <StatCard icon={AlertTriangle} label="SLA breached" value={s?.breached} loading={summary.loading} tone="red" hint="Past deadline" onClick={() => setFilter('sla', 'breached')} active={filters.sla === 'breached'} alert={!!s?.breached} />
-        <StatCard icon={CheckCircle2} label="Resolved today" value={s?.resolvedToday} loading={summary.loading} tone="emerald" hint="Since midnight" onClick={() => setFilter('status', 'resolved')} active={filters.status === 'resolved'} />
+        <StatCard icon={Inbox} label={t('kpiWaiting')} value={s?.open} loading={summary.loading} tone="brand" hint={t('kpiWaitingHint')} onClick={() => setFilter('status', 'open')} active={filters.status === 'open'} />
+        <StatCard icon={Wrench} label={t('kpiInProgress')} value={s?.inProgress} loading={summary.loading} tone="violet" hint={t('kpiInProgressHint')} onClick={() => setFilter('status', 'in_progress')} active={filters.status === 'in_progress'} />
+        <StatCard icon={Flame} label={t('kpiCritical')} value={s?.critical} loading={summary.loading} tone="red" hint={t('kpiCriticalHint')} onClick={() => setFilter('priority', '5')} active={filters.priority === '5'} alert={!!s?.critical} />
+        <StatCard icon={Clock} label={t('kpiAtRisk')} value={s?.atRisk} loading={summary.loading} tone="amber" hint={t('kpiAtRiskHint')} onClick={() => setFilter('sla', 'at_risk')} active={filters.sla === 'at_risk'} />
+        <StatCard icon={AlertTriangle} label={t('kpiPastDeadline')} value={s?.breached} loading={summary.loading} tone="red" hint={t('kpiPastDeadlineHint')} onClick={() => setFilter('sla', 'breached')} active={filters.sla === 'breached'} alert={!!s?.breached} />
+        <StatCard icon={CheckCircle2} label={t('kpiResolvedToday')} value={s?.resolvedToday} loading={summary.loading} tone="emerald" hint={t('kpiResolvedTodayHint')} onClick={() => setFilter('status', 'resolved')} active={filters.status === 'resolved'} />
       </div>
 
       {/* Filters */}
-      <div className="space-y-3 rounded-2xl border border-border bg-card p-3 shadow-soft">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1">
-            {STATUS_CHIPS.map((c) => (
-              <button
-                key={c.value}
-                type="button"
-                onClick={() => setFilter('status', c.value === 'active' ? '' : c.value)}
-                className={cn(
-                  'rounded-lg px-3 py-1.5 text-[13px] font-semibold transition-all',
-                  filters.status === c.value ? 'bg-white text-foreground shadow-soft' : 'text-muted-foreground hover:text-foreground',
-                )}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
-          <span className="mx-1 hidden h-6 w-px bg-border sm:block" />
-          <div className="flex flex-wrap gap-1.5">
-            {[5, 4, 3, 2, 1].map((p) => {
-              const on = filters.priority === String(p);
-              return (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setFilter('priority', on ? '' : String(p))}
-                  aria-pressed={on}
-                  className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset transition-all',
-                    on ? PRIORITY_META[p].badge : 'bg-white text-slate-600 ring-border hover:ring-slate-300',
-                  )}
-                >
-                  <span className="size-1.5 rounded-full" style={{ background: PRIORITY_META[p].color }} />P{p}
-                </button>
-              );
-            })}
-          </div>
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card p-2.5 shadow-soft">
+        <div className="flex flex-wrap gap-1 rounded-xl bg-muted p-1">
+          {STATUS_CHIPS.map((c) => (
+            <button
+              key={c.value}
+              type="button"
+              aria-pressed={filters.status === c.value}
+              onClick={() => setFilter('status', c.value === 'active' ? '' : c.value)}
+              className={cn('rounded-lg px-3 py-1.5 text-[0.8125rem] font-semibold transition-all', filters.status === c.value ? 'bg-card text-foreground shadow-soft' : 'text-muted-foreground hover:text-foreground')}
+            >
+              {t(c.label)}
+            </button>
+          ))}
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <span className="mx-1 hidden h-6 w-px bg-border sm:block" />
+        <div className="flex flex-wrap gap-1.5">
+          {[5, 4, 3, 2, 1].map((p) => {
+            const on = filters.priority === String(p);
+            return (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setFilter('priority', on ? '' : String(p))}
+                aria-pressed={on}
+                className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset transition-all', on ? PRIORITY_META[p].badge : 'bg-card text-muted-foreground ring-border hover:ring-slate-400')}
+              >
+                <span className="size-1.5 rounded-full" style={{ background: PRIORITY_META[p].color }} />
+                P{p}
+              </button>
+            );
+          })}
+        </div>
+        <span className="mx-1 hidden h-6 w-px bg-border 2xl:block" />
+        <div className="flex w-full flex-wrap items-center gap-2 2xl:w-auto 2xl:flex-1">
           {isAdmin && (
-            <Select value={filters.department} onChange={(e) => setFilter('department', e.target.value)} aria-label="Department">
-              <option value="">All departments</option>
+            <Select value={filters.department} onChange={(e) => setFilter('department', e.target.value)} aria-label={t('allDepartments')}>
+              <option value="">{t('allDepartments')}</option>
               {meta.data?.departments.map((d) => <option key={d}>{d}</option>)}
             </Select>
           )}
-          <Select value={filters.category} onChange={(e) => setFilter('category', e.target.value)} aria-label="Category">
-            <option value="">All categories</option>
+          <Select value={filters.category} onChange={(e) => setFilter('category', e.target.value)} aria-label={t('anyCategory')}>
+            <option value="">{t('anyCategory')}</option>
             {meta.data?.categories.map((c) => <option key={c}>{c}</option>)}
           </Select>
-          <Select value={filters.sla} onChange={(e) => setFilter('sla', e.target.value)} aria-label="SLA">
-            <option value="">Any SLA state</option>
-            <option value="on_track">On track</option>
-            <option value="at_risk">At risk</option>
-            <option value="breached">Breached</option>
+          <Select value={filters.sla} onChange={(e) => setFilter('sla', e.target.value)} aria-label={t('anyDeadline')}>
+            <option value="">{t('anyDeadline')}</option>
+            <option value="on_track">{t('slaOnTrack')}</option>
+            <option value="at_risk">{t('slaAtRisk')}</option>
+            <option value="breached">{t('slaBreached')}</option>
           </Select>
-          <Select value={filters.sort} onChange={(e) => setFilter('sort', e.target.value === 'priority' ? '' : e.target.value)} aria-label="Sort">
-            <option value="priority">Sort: priority</option>
-            <option value="sla">Sort: SLA deadline</option>
-            <option value="reports">Sort: most reported</option>
-            <option value="recent">Sort: most recent</option>
+          <Select value={filters.sort} onChange={(e) => setFilter('sort', e.target.value === 'priority' ? '' : e.target.value)} aria-label={t('sortPriority')}>
+            <option value="priority">{t('sortPriority')}</option>
+            <option value="sla">{t('sortSla')}</option>
+            <option value="reports">{t('sortReports')}</option>
+            <option value="recent">{t('sortRecent')}</option>
           </Select>
           {filters.q && (
             <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 py-1 pl-3 pr-1 text-xs font-semibold text-brand-800 ring-1 ring-inset ring-brand-500/20">
               “{filters.q}”
-              <button type="button" onClick={() => setFilter('q', '')} className="rounded-full p-0.5 hover:bg-brand-100" aria-label="Clear search">
+              <button type="button" onClick={() => setFilter('q', '')} className="rounded-full p-0.5 hover:bg-brand-100" aria-label={t('clearFilters')}>
                 <X className="size-3" />
               </button>
             </span>
           )}
           {activeFilterCount > 0 && (
             <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setParams(new URLSearchParams(), { replace: true })}>
-              <X /> Clear filters
+              <X /> {t('clearFilters')}
             </Button>
           )}
         </div>
@@ -210,13 +205,12 @@ export function OfficerQueuePage() {
             <p className="text-sm font-semibold">
               {issues.data ? (
                 <>
-                  {issues.data.total} <span className="font-normal text-subtle">issue{issues.data.total === 1 ? '' : 's'}</span>
+                  {issues.data.total} <span className="font-normal text-subtle">{t('issuesCount')}</span>
                 </>
               ) : (
                 <Skeleton className="h-4 w-20" />
               )}
             </p>
-            {issues.loading && issues.data && <span className="h-1 w-16 overflow-hidden rounded-full bg-slate-100"><span className="block h-full w-1/2 animate-[shimmer_1s_linear_infinite] bg-brand-500/50" /></span>}
           </div>
           {issues.loading && !issues.data ? (
             <div className="space-y-2 p-4">
@@ -230,17 +224,17 @@ export function OfficerQueuePage() {
             </div>
           ) : issues.data?.items.length === 0 ? (
             <div className="p-4">
-              <EmptyState icon={CheckCircle2} title="All clear" description="No issues match these filters. Nice work — or try clearing filters." />
+              <EmptyState icon={CheckCircle2} title={t('allClear')} description={t('allClearSub')} />
             </div>
           ) : (
             <div className="scrollbar-thin max-h-[calc(100dvh-180px)] overflow-auto">
               <table className="w-full min-w-[580px] text-sm">
-                <thead className="sticky top-0 z-10 bg-slate-50/95 backdrop-blur">
-                  <tr className="text-left text-[11px] font-semibold uppercase tracking-wider text-subtle">
-                    <th className="w-[104px] py-2.5 pl-4 pr-2">Priority</th>
-                    <th className="px-2 py-2.5">Issue</th>
-                    <th className="w-[136px] px-2 py-2.5">Status · SLA</th>
-                    <th className="w-[64px] px-4 py-2.5 text-right">Reports</th>
+                <thead className="sticky top-0 z-10 bg-muted/95 backdrop-blur">
+                  <tr className="text-left text-[0.6875rem] font-semibold uppercase tracking-wider text-subtle">
+                    <th className="w-[104px] py-2.5 pl-4 pr-2">{t('colPriority')}</th>
+                    <th className="px-2 py-2.5">{t('colIssue')}</th>
+                    <th className="w-[136px] px-2 py-2.5">{t('colStatus')}</th>
+                    <th className="w-[64px] px-4 py-2.5 text-right">{t('colReports')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">

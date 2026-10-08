@@ -2,10 +2,13 @@ import { AlertTriangle, Clock, Sparkles, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/primitives';
 import { CATEGORY_ICONS, PRIORITY_META, SLA_META, STATUS_META } from '@/lib/constants';
 import { slaCountdown } from '@/lib/format';
+import { useI18n } from '@/lib/i18n';
 import type { IssueStatus, SlaState } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
-export function PriorityBadge({ priority, ta, className, size = 'sm' }: { priority: number; ta?: boolean; className?: string; size?: 'sm' | 'lg' }) {
+export function PriorityBadge({ priority, ta: taProp, className, size = 'sm' }: { priority: number; ta?: boolean; className?: string; size?: 'sm' | 'lg' }) {
+  const { lang } = useI18n();
+  const ta = taProp ?? lang === 'ta';
   const m = PRIORITY_META[priority] ?? PRIORITY_META[3];
   return (
     <Badge className={cn(m.badge, size === 'lg' && 'gap-2 px-3.5 py-1.5 text-sm font-semibold', className)}>
@@ -15,7 +18,9 @@ export function PriorityBadge({ priority, ta, className, size = 'sm' }: { priori
   );
 }
 
-export function StatusBadge({ status, ta }: { status: IssueStatus; ta?: boolean }) {
+export function StatusBadge({ status, ta: taProp }: { status: IssueStatus; ta?: boolean }) {
+  const { lang } = useI18n();
+  const ta = taProp ?? lang === 'ta';
   const m = STATUS_META[status];
   return (
     <Badge className={m.badge}>
@@ -26,12 +31,14 @@ export function StatusBadge({ status, ta }: { status: IssueStatus; ta?: boolean 
 }
 
 export function SlaBadge({ state, dueAt }: { state: SlaState; dueAt?: string }) {
+  const { lang } = useI18n();
   const m = SLA_META[state];
+  const label = lang === 'ta' ? m.ta : m.label;
   const countdown = dueAt && (state === 'on_track' || state === 'at_risk' || state === 'breached') ? slaCountdown(dueAt).text : null;
   return (
     <Badge className={cn(m.badge, 'font-semibold tabular-nums')}>
       {state === 'breached' ? <AlertTriangle className="size-3" /> : <Clock className="size-3" />}
-      {countdown ?? m.label}
+      {countdown ?? label}
     </Badge>
   );
 }

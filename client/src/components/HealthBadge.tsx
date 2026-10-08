@@ -23,7 +23,7 @@ export function HealthBadge() {
     <div className="flex flex-wrap gap-2">
       <Pill tone="good" label="API online" />
       <Pill tone={database === 'connected' ? 'good' : 'warn'} label={`MongoDB ${database}`} />
-      <Pill tone={gemini.configured ? 'good' : 'warn'} label={gemini.configured ? `Gemini · ${gemini.model}` : 'Gemini: no key'} />
+      <Pill tone={gemini.configured ? 'good' : 'warn'} label={gemini.configured ? `Triage model · ${gemini.model}` : 'Triage model: not configured'} />
     </div>
   );
 }
@@ -32,7 +32,7 @@ function Pill({ tone, label }: { tone: 'good' | 'warn' | 'bad'; label: string })
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset',
+        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold ring-1 ring-inset',
         tone === 'good' && 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
         tone === 'warn' && 'bg-amber-50 text-amber-700 ring-amber-500/30',
         tone === 'bad' && 'bg-red-50 text-red-700 ring-red-600/20',

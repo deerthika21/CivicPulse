@@ -139,7 +139,7 @@ export function VoiceRecorder({ value, onChange }: { value: Blob | null; onChang
         onClick={start}
         className="flex w-full items-center gap-4 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/60 p-4 text-left transition-all duration-150 hover:border-teal-500/60 hover:bg-teal-50/50 active:scale-[0.99]"
       >
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white text-teal-700 shadow-soft ring-1 ring-border">
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-card text-teal-700 shadow-soft ring-1 ring-border">
           <Mic className="size-5" />
         </span>
         <span>

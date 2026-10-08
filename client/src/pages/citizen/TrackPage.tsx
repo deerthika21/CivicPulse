@@ -33,7 +33,7 @@ export function TrackPage() {
   return (
     <PageTransition className="mx-auto max-w-xl space-y-5 px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
       <div className="space-y-3">
-        <h1 className="font-display text-[28px] font-bold tracking-tight">{t('findComplaint')}</h1>
+        <h1 className="font-display text-4xl font-extrabold tracking-tight">{t('findComplaint')}</h1>
         <form onSubmit={onSubmit} className="flex gap-2">
           <Input
             value={code}
@@ -76,9 +76,9 @@ export function TrackPage() {
         <>
           {/* status hero */}
           <Card className="gap-5 overflow-hidden p-0">
-            <div className="flex items-start justify-between gap-3 bg-gradient-to-br from-brand-50 via-white to-teal-50/60 p-5">
+            <div className="flex items-start justify-between gap-3 bg-gradient-to-br from-brand-50 via-card to-teal-50/60 p-5">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-subtle">{t('trackingId')}</p>
+                <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-subtle">{t('trackingId')}</p>
                 <p className="font-mono text-xl font-bold tracking-[0.1em] text-slate-900">{data.complaint.trackingCode}</p>
                 <p className="mt-1 flex items-center gap-1.5 text-xs text-subtle">
                   <CalendarClock className="size-3.5" /> {t('reportedOn')} {formatDateTime(data.complaint.createdAt)}
@@ -111,10 +111,10 @@ export function TrackPage() {
 
           <Card className="gap-3 p-5">
             <CardTitle>{t('yourComplaint')}</CardTitle>
-            {data.complaint.text && <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-slate-800">{data.complaint.text}</p>}
+            {data.complaint.text && <p className="whitespace-pre-wrap text-[0.9375rem] leading-relaxed text-slate-800">{data.complaint.text}</p>}
             {data.complaint.language !== 'English' && data.complaint.translation && (
               <div className="rounded-xl bg-slate-50 p-3 ring-1 ring-inset ring-border">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-subtle">{t('translation')}</p>
+                <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-subtle">{t('translation')}</p>
                 <p className="mt-1 text-sm text-slate-700">{data.complaint.translation}</p>
               </div>
             )}
@@ -140,9 +140,9 @@ export function TrackPage() {
 }
 
 function StatusStepper({ status }: { status: IssueStatus }) {
-  const { lang } = useI18n();
+  const { t } = useI18n();
   const current = STEPS.indexOf(status);
-  const labels = { en: ['Received', 'In progress', 'Resolved'], ta: ['பெறப்பட்டது', 'நடைபெறுகிறது', 'தீர்க்கப்பட்டது'] }[lang];
+  const labels = [t('stageReceived'), t('stageWorking'), t('stageDone')];
   const icons = [Inbox, Wrench, Check];
   return (
     <ol className="flex items-start" aria-label={`Status: ${labels[current]}`}>
@@ -155,7 +155,7 @@ function StatusStepper({ status }: { status: IssueStatus }) {
             {i > 0 && <span className={cn('absolute right-1/2 top-4 h-0.5 w-full -translate-y-1/2', i <= current ? 'bg-teal-500' : 'bg-slate-200')} />}
             <span
               className={cn(
-                'relative z-10 flex size-8 items-center justify-center rounded-full ring-4 ring-white transition-all',
+                'relative z-10 flex size-8 items-center justify-center rounded-full ring-4 ring-card transition-all',
                 done && 'bg-teal-brand text-white',
                 active && 'bg-brand-gradient text-white shadow-brand',
                 !done && !active && 'bg-slate-100 text-slate-400',

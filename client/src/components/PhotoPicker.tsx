@@ -77,7 +77,7 @@ export function PhotoPicker({ value, onChange }: { value: File | null; onChange:
             dragging && 'border-brand-500 bg-brand-50',
           )}
         >
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 shadow-soft ring-1 ring-border">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-card text-brand-600 shadow-soft ring-1 ring-border">
             {dragging ? <ImagePlus className="size-5" /> : <Camera className="size-5" />}
           </span>
           <span>

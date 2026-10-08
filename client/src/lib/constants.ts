@@ -36,18 +36,18 @@ export const PRIORITY_META: Record<number, { label: string; ta: string; color: s
 };
 
 export const STATUS_META: Record<IssueStatus, { label: string; ta: string; badge: string; dot: string }> = {
-  open: { label: 'Open', ta: 'திறந்தது', badge: 'bg-brand-50 text-brand-800 ring-brand-500/20', dot: 'bg-brand-500' },
-  in_progress: { label: 'In progress', ta: 'நடைபெறுகிறது', badge: 'bg-violet-50 text-violet-700 ring-violet-500/20', dot: 'bg-violet-500' },
-  resolved: { label: 'Resolved', ta: 'தீர்க்கப்பட்டது', badge: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20', dot: 'bg-emerald-500' },
+  open: { label: 'Waiting', ta: 'காத்திருக்கிறது', badge: 'bg-brand-50 text-brand-800 ring-brand-500/20', dot: 'bg-brand-500' },
+  in_progress: { label: 'In the field', ta: 'களத்தில்', badge: 'bg-violet-50 text-violet-700 ring-violet-500/20', dot: 'bg-violet-500' },
+  resolved: { label: 'Fixed', ta: 'சரிசெய்யப்பட்டது', badge: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20', dot: 'bg-emerald-500' },
   rejected: { label: 'Closed', ta: 'மூடப்பட்டது', badge: 'bg-slate-100 text-slate-600 ring-slate-400/25', dot: 'bg-slate-400' },
 };
 
-export const SLA_META: Record<SlaState, { label: string; badge: string }> = {
-  on_track: { label: 'On track', badge: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' },
-  at_risk: { label: 'At risk', badge: 'bg-amber-50 text-amber-700 ring-amber-500/30' },
-  breached: { label: 'SLA breached', badge: 'bg-red-600 text-white ring-red-600' },
-  met: { label: 'SLA met', badge: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' },
-  missed: { label: 'SLA missed', badge: 'bg-slate-100 text-slate-600 ring-slate-400/25' },
+export const SLA_META: Record<SlaState, { label: string; ta: string; badge: string }> = {
+  on_track: { label: 'On time', ta: 'நேரத்தில்', badge: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' },
+  at_risk: { label: 'Running late', ta: 'தாமதம்', badge: 'bg-amber-50 text-amber-700 ring-amber-500/30' },
+  breached: { label: 'Past deadline', ta: 'காலக்கெடு கடந்தது', badge: 'bg-red-600 text-white ring-red-600' },
+  met: { label: 'Fixed on time', ta: 'நேரத்தில் சரிசெய்தது', badge: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' },
+  missed: { label: 'Fixed late', ta: 'தாமதமாகச் சரிசெய்தது', badge: 'bg-slate-100 text-slate-600 ring-slate-400/25' },
 };
 
 export const CHENNAI_CENTER: [number, number] = [13.0475, 80.2209];
