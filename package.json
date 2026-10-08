@@ -1,0 +1,17 @@
+{
+  "name": "civicpulse",
+  "private": true,
+  "version": "0.1.0",
+  "description": "CivicPulse — AI complaint triage for Chennai civic bodies",
+  "scripts": {
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install",
+    "dev": "concurrently -k -n server,client -c cyan,magenta \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix server run build && npm --prefix client run build",
+    "typecheck": "npm --prefix server run typecheck && npm --prefix client run typecheck",
+    "dev:demo": "concurrently -k -n server,client -c cyan,magenta \"npm --prefix server run dev:memory\" \"npm --prefix client run dev\"",
+    "seed": "npm --prefix server run seed"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}
