@@ -32,7 +32,8 @@ export const env = {
   clientOrigins: parsed.data.CLIENT_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean),
 };
 
-if (env.isProd && env.JWT_SECRET === 'dev-insecure-secret') {
-  console.error('JWT_SECRET must be set in production.');
+// Empty or short secrets would start fine and then break every login, so refuse to boot instead.
+if (env.isProd && (env.JWT_SECRET === 'dev-insecure-secret' || env.JWT_SECRET.length < 32)) {
+  console.error('JWT_SECRET must be set to a random string of at least 32 characters in production.');
   process.exit(1);
 }
