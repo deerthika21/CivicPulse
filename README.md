@@ -12,7 +12,7 @@ AI-powered complaint triage for civic bodies, built for **HN-AI-02 · Smart Comp
 ![React](https://img.shields.io/badge/React-Vite-61DAFB?logo=react&logoColor=black)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=nodedotjs&logoColor=white)
 
-**[🔗 Live Demo]([YOUR_RENDER_URL](https://civicpulse-ted0.onrender.com/track/CP-6L6J5S))**
+**[🔗 Live Demo]([https://civicpulse-ted0.onrender.com/track/CP-6L6J5S])**
 
 </div>
 
